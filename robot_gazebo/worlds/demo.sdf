@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+
+    <!-- ======================================================================
+        [WORLD] WORLD MODEL
+    ======================================================================= -->
+    <world name="demo">
+
+        <!-- ─────────────────────────────────────────────
+            [PHYSICS]
+        ────────────────────────────────────────────── -->
+        <scene>
+            <shadows>0</shadows>
+        </scene>
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] PHYSICS
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-physics-system"
+                name="ignition::gazebo::systems::Physics">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] USER COMMANDS
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-user-commands-system"
+                name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] SCENE BROADCASTER
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-scene-broadcaster-system"
+                name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] SENSORS
+        ────────────────────────────────────────────── -->
+        <plugin filename="libignition-gazebo-sensors-system.so"
+                name="ignition::gazebo::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] IMU
+        ────────────────────────────────────────────── -->
+        <plugin filename="libignition-gazebo-imu-system"
+                name="ignition::gazebo::systems::Imu">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [LIGHT] SUN
+        ────────────────────────────────────────────── -->
+        <light name="sun" type="directional">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <!-- ─────────────────────────────────────────────
+            [MODEL] GROUND PLANE
+        ────────────────────────────────────────────── -->
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                </collision>
+
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.8 0.8 1</ambient>
+                        <diffuse>0.8 0.8 0.8 1</diffuse>
+                        <specular>0.8 0.8 0.8 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+    </world>
+
+</sdf>

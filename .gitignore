@@ -1,0 +1,21 @@
+# ROS2 build
+build/
+install/
+log/
+
+# VS Code
+.vscode/
+
+# Database / cache
+*.db
+
+# Python
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
