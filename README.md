@@ -51,7 +51,7 @@ robot_ws/
 
 |  Parameter           | Value      |
 |:---------------------|-----------:|
-|  Wheel Radius        | 0.0396 m   |
+|  Wheel Radius        | 0.0792 m   |
 |  Wheel Separation    | 0.288 m    |
 |  Max Linear Velocity | 1.0 m/s    |
 |  Max Angular Velocity| 1.0 rad/s  |
@@ -154,10 +154,11 @@ ros2 topic echo /imu/data
 | `/clock`                   | GZ → ROS       | `/clock`                      |
 | `/tf`                      | GZ → ROS       | `/tf`                         |
 | `/tf_statics`              | GZ → ROS       | `/tf_static`                  |
-| `/odom`                    | GZ → ROS       | `/model/robot/odometry`       |
-| `/cmd_vel`                 | ROS → GZ       | `/cmd_vel`     |
-| `/imu/data`                | GZ → ROS       | `/imu/data`    |
-| `/lidar/data`              | GZ → ROS       | `/lidar/data`  |
+| `/diff_drive/odom`         | GZ → ROS       | `/diff_drive/odom`            |
+| `/odom_publisher/odom`     | GZ → ROS       | `/odom_publisher/odom`        |
+| `/cmd_vel`                 | ROS → GZ       | `/cmd_vel`                    |
+| `/imu/data`                | GZ → ROS       | `/imu/data`                   |
+| `/lidar/data`              | GZ → ROS       | `/lidar/data`                 |
 | `/joint_states`            | GZ → ROS       | `/world/demo/model/robot/joint_state`                                        |
 | `/camera/color/image_raw`  | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/image`       |
 | `/camera/depth/image_raw`  | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/depth_image` |
