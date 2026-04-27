@@ -484,7 +484,7 @@
         ────────────────────────────────────────────── -->
         <plugin filename="ignition-gazebo-odometry-publisher-system"
                 name="ignition::gazebo::systems::OdometryPublisher">
-            <odom_frame>world</odom_frame>
+            <odom_frame>odom</odom_frame>
             <robot_base_frame>base_footprint</robot_base_frame>
             <odom_topic>/odom_publisher/odom</odom_topic>
             <odom_covariance_topic>/odom_publisher/odom_with_covariance</odom_covariance_topic>
