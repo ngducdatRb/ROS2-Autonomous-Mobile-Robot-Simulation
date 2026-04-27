@@ -451,6 +451,7 @@
         ────────────────────────────────────────────── -->
         <plugin filename="ignition-gazebo-joint-state-publisher-system"
                 name="ignition::gazebo::systems::JointStatePublisher">
+            <topic>/joint_state_publisher/joint_state</topic>
         </plugin>
 
         <!-- ─────────────────────────────────────────────
