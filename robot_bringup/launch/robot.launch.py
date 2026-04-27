@@ -40,11 +40,11 @@ def generate_launch_description():
     rsp = Node(
         package    ='robot_state_publisher',
         executable ='robot_state_publisher',
+        output     ='screen'
         parameters =[
             {'use_sim_time': True},
             {'robot_description': file_urdf},
         ],
-        output='screen'
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
@@ -61,8 +61,9 @@ def generate_launch_description():
     rviz = Node(
         package     ='rviz2',
         executable  ='rviz2',
-        arguments   =['-d', file_cfg_rviz],
         output      ='screen'
+        arguments   =['-d', file_cfg_rviz],
+
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
@@ -71,12 +72,12 @@ def generate_launch_description():
     robot = Node(
         package     ='ros_gz_sim',
         executable  ='create',
+        output      ='screen'
         arguments   =[
             '-name', 'robot',
             '-topic', 'robot_description',
             '-x', '0', '-y', '0', '-z', '0.01'
         ],
-        output      ='screen'
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
@@ -85,11 +86,11 @@ def generate_launch_description():
     bridge = Node(
         package     ='ros_gz_bridge',
         executable  ='parameter_bridge',
+        output      ='screen'
         parameters  =[{
             'config_file': file_cfg_bridge,
             'qos_overrides./tf_static.publisher.durability': 'transient_local',
         }],
-        output      ='screen'
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
