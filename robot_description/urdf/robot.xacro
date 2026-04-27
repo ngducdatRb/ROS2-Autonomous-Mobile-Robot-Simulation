@@ -467,7 +467,7 @@
             <left_joint>wheel_left_joint</left_joint>
             <right_joint>wheel_right_joint</right_joint>
             <wheel_separation>0.288</wheel_separation>
-            <wheel_radius>0.0396</wheel_radius>
+            <wheel_radius>0.0792</wheel_radius>
 
             <max_linear_acceleration>0.5</max_linear_acceleration>
             <min_linear_acceleration>-0.5</min_linear_acceleration>
