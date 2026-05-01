@@ -4,7 +4,7 @@ A ROS2 differential drive robot simulation, built on **ROS2 Humble** and **Ignit
 
 Provide a complete simulation pipeline
 
-Focus on **odometry drift analysis**, **quantitative evaluation of localization errors**
+Focus on **odometry drift analysis**, **quantitative evaluation of localization errors**, **fuse data using pkg robot_localization**
 
 ![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)
 ![Gazebo](https://img.shields.io/badge/Gazebo-Ignition%20Fortress-orange)
