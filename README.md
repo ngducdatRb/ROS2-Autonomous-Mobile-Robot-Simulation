@@ -13,13 +13,13 @@ Focus on **odometry drift analysis**, **quantitative evaluation of localization 
 
 ## 📷 Preview
 
-### Odometry Drift
-
-![OdomDrift](robot_metrics/images/odom_drift_1.gif)
-
 ### Odometry Error Analysis
 
-<img src="robot_metrics/images/plot_errors.png" width="800"/>
+![OdomDrift](robot_metrics/images/odom_drift.gif)
+
+<img src="robot_metrics/images/plot_error_2.png" width="800"/>
+
+<img src="robot_metrics/images/ekf_robot_localization.png" width="800"/>
 
 ---
 
@@ -28,13 +28,14 @@ Focus on **odometry drift analysis**, **quantitative evaluation of localization 
 - 🔹 Differential drive robot simulation in Ignition Gazebo  
 - 🔹 ROS2 integration with full sensor stack (IMU, LiDAR, Depth Camera)  
 - 🔹 Real-time teleoperation and visualization (RViz2)  
+- 🔹 **Use the `robot_localization` package to fuse wheel odometry and IMU data**
 - 🔹 **Odometry drift analysis using rosbag data**  
 - 🔹 **Automated error evaluation between wheel odometry and ground truth**
 - 🔹 Visualization of:
   - 2D trajectory comparison  
-  - Axis-wise position error (X, Y)  
   - Euclidean distance drift  
   - Yaw (heading) error  
+  - Metric table
 
 ---
 
@@ -47,21 +48,26 @@ In mobile robotics, **wheel odometry is inherently prone to drift** due to:
 
 This repository includes a dedicated evaluation pipeline that:
 
-1. Records both:
-   - Ground truth trajectory (`/odom_publisher/odom`)
+1. Use the `robot_localization` package to fuse wheel odometry and IMU data
+
+2. Records both:
+   - Ground truth trajectory (`/model/robot/pose`)
    - Wheel odometry (`/diff_drive/odom`)
+   - Odometry Publisher plugin (`/odom_publisher/odom`)
+   - Odometry Filtered EKF - robot_localization pkg (`/odometry/filtered`)
 
-2. Aligns trajectories in time and interpolates data
+3. Aligns trajectories in time and interpolates data
 
-3. Computes key error metrics:
-   - Absolute position error  
-   - Euclidean distance drift  
+4. Computes key error metrics: 
+   - Euclidean distance drift error
    - Yaw error  
-   - RMSE  
+   - RMSE yaw & distance
 
-4. Generates visualization plots for analysis
+5. Generates visualization plots for analysis
 
 This allows users to **quantitatively assess odometry performance** in simulation.
+
+**Result**: After simulation, EKF produced filtered odometry that was **77.5%** improved compared to wheel odometry.
 
 ---
 
@@ -151,7 +157,7 @@ ros2 topic echo /imu/data
 cd ~/robot_ws/src/robot_bag/odom_drift_1/
 
 # Play rosbag
-ros2 bag play odom_drift_1/odom_drift_1.db3 
+ros2 bag play odom_drift_2.db3 
 ```
 
 ### Run Evaluation Script
@@ -160,7 +166,7 @@ ros2 bag play odom_drift_1/odom_drift_1.db3
 cd ~/robot_ws/src/robot_metrics/
 
 # Run evaluation file
-python3 robot_metrics/plot_odom_error.py
+python3 plot_error.py
 ```
 **Note**: Remember to update the file paths in scripts before run file.
 `bag_path = "/path/to/your/rosbag"`
