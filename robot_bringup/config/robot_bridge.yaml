@@ -23,6 +23,26 @@
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
 
+# - ros_topic_name: "/world/demo/dynamic_pose/info"
+#  gz_topic_name: "/world/demo/dynamic_pose/info"
+#  ros_type_name: "tf2_msgs/msg/TFMessage"
+#  ros_type_name: "geometry_msgs/msg/PoseArray"
+#  gz_type_name: "gz.msgs.Pose_V"
+#  direction: GZ_TO_ROS
+ 
+# - ros_topic_name: "/world/demo/pose/info"
+#  gz_topic_name: "/world/demo/pose/info"
+#  ros_type_name: "tf2_msgs/msg/TFMessage"
+#  ros_type_name: "geometry_msgs/msg/PoseArray"
+#  gz_type_name: "gz.msgs.Pose_V"
+#  direction: GZ_TO_ROS
+
+- ros_topic_name: "/model/robot/pose"
+  gz_topic_name: "/model/robot/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
+  direction: GZ_TO_ROS
+
 - ros_topic_name: "/cmd_vel"
   gz_topic_name: "/cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
@@ -47,11 +67,11 @@
   gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "/lidar/data"
-  gz_topic_name: "/lidar/data"
-  ros_type_name: "sensor_msgs/msg/LaserScan"
-  gz_type_name: "gz.msgs.LaserScan"
-  direction: GZ_TO_ROS
+# - ros_topic_name: "/lidar/data"
+#   gz_topic_name: "/lidar/data"
+#   ros_type_name: "sensor_msgs/msg/LaserScan"
+#   gz_type_name: "gz.msgs.LaserScan"
+#   direction: GZ_TO_ROS
 
 # - ros_topic_name: "/camera/color/image_raw"
 #   gz_topic_name: "/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/image"

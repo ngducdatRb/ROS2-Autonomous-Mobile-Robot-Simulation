@@ -26,6 +26,7 @@ def generate_launch_description():
     file_cfg_world  = os.path.join(pkg_gazebo, 'worlds', 'demo.sdf')
     file_cfg_rviz   = os.path.join(pkg_bringup, 'config', 'robot.rviz')
     file_cfg_bridge = os.path.join(pkg_bringup, 'config', 'robot_bridge.yaml')
+    file_ekf_config = os.path.join(pkg_bringup, 'config', 'robot_localization.yaml')
     file_gz_sim     = os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
 
     # ──────────────────────────────────────────────────────────────────────────────────
@@ -52,7 +53,7 @@ def generate_launch_description():
     # ──────────────────────────────────────────────────────────────────────────────────
     ign = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(file_gz_sim),
-        launch_arguments={'gz_args': file_cfg_world}.items()
+        launch_arguments={'gz_args': f'-r -s {file_cfg_world}'}.items()
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
@@ -94,9 +95,22 @@ def generate_launch_description():
     )
 
     # ──────────────────────────────────────────────────────────────────────────────────
+    # ROBOT LOCALIZATION
+    # ──────────────────────────────────────────────────────────────────────────────────
+    ekf = Node(
+        package     ='robot_localization',
+        executable  ='ekf_node',
+        name        ='ekf_filter_node',
+        output      ='screen',
+        parameters  = [file_ekf_config],
+    )
+
+
+    # ──────────────────────────────────────────────────────────────────────────────────
     # LAUNCH
     # ──────────────────────────────────────────────────────────────────────────────────
     return LaunchDescription([
+        ekf,
         ign,
         bridge,
         TimerAction(period=5.0, actions=[ 
