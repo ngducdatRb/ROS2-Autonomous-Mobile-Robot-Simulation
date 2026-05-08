@@ -13,6 +13,11 @@ A ROS2 differential drive robot simulation, built on **ROS2 Humble** and **Ignit
 
 <img src="images/camera_lidar.png" width="800"/>
 
+<p align="left">
+  <img src="images/multi_robot_1.png" width="400"/>
+  <img src="images/multi_robot_2.png" width="400"/>
+</p>
+
 <img src="images/frames.png" width="800"/>
 
 ---
@@ -26,8 +31,7 @@ robot_ws/
     │
     ├── robot_bringup/              # Launch files, configs
     │   ├── config/
-    │   │   ├── robot.rviz
-    │   │   └── robot_bridge.yaml
+    │   │   └── robot.rviz
     │   ├── launch/
     │   │   └── robot.launch.py
     │   └── scripts/
@@ -60,8 +64,8 @@ robot_ws/
 
 |  Sensor       |   Type           |   Topic         | Rate   |
 |:--------------|:-----------------|:----------------|-------:|
-|  IMU          |   9-DOF IMU      |   `/imu/data`   | 50 Hz  |
-|  LiDAR        |   Hokuyo UST-10  |   `/lidar/data` | 10 Hz  |
+|  IMU          |   9-DOF IMU      |   `/r1/imu`     | 50 Hz  |
+|  LiDAR        |   Hokuyo UST-10  |   `/r1/lidar`   | 10 Hz  |
 |  Depth Camera | Intel RealSense D435 | `/camera/*` | 5 Hz   |
 
 ---
@@ -136,32 +140,11 @@ python3 teleop_keyboard.py
 
 ```bash
 # Check odometry
-ros2 topic echo /odom
+ros2 topic echo /r1/odom
 
 # Check LiDAR
-ros2 topic echo /lidar/data
+ros2 topic echo /r1/lidar
 
 # Check IMU
-ros2 topic echo /imu/data
+ros2 topic echo /r1/imu
 ```
-
----
-
-## 🌉 ROS-GZ Bridge Topics
-
-| ROS Topic                  | Direction      |        GZ Topic               |
-|----------------------------|----------------|-------------------------------|
-| `/clock`                   | GZ → ROS       | `/clock`                      |
-| `/tf`                      | GZ → ROS       | `/tf`                         |
-| `/tf_statics`              | GZ → ROS       | `/tf_static`                  |
-| `/diff_drive/odom`         | GZ → ROS       | `/diff_drive/odom`            |
-| `/odom_publisher/odom`     | GZ → ROS       | `/odom_publisher/odom`        |
-| `/cmd_vel`                 | ROS → GZ       | `/cmd_vel`                    |
-| `/imu/data`                | GZ → ROS       | `/imu/data`                   |
-| `/lidar/data`              | GZ → ROS       | `/lidar/data`                 |
-| `/joint_states`            | GZ → ROS       | `/world/demo/model/robot/joint_state`                                        |
-| `/camera/color/image_raw`  | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/image`       |
-| `/camera/depth/image_raw`  | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/depth_image` |
-| `/camera/camera_info`      | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/camera_info` |
-| `/camera/depth/points`     | GZ → ROS       | `/world/demo/model/robot/link/base_footprint/sensor/rgbd_camera/points`      |
-

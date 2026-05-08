@@ -1,0 +1,537 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+
+    <!-- ======================================================================
+        [WORLD] WORLD MODEL
+    ======================================================================= -->
+    <world name="demo">
+
+        <!-- ─────────────────────────────────────────────
+            [PHYSICS]
+        ────────────────────────────────────────────── -->
+        <scene>
+            <shadows>0</shadows>
+        </scene>
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] PHYSICS
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-physics-system"
+                name="ignition::gazebo::systems::Physics">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] USER COMMANDS
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-user-commands-system"
+                name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] SCENE BROADCASTER
+        ────────────────────────────────────────────── -->
+        <plugin filename="ignition-gazebo-scene-broadcaster-system"
+                name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] SENSORS
+        ────────────────────────────────────────────── -->
+        <plugin filename="libignition-gazebo-sensors-system.so"
+                name="ignition::gazebo::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [PLUGIN] IMU
+        ────────────────────────────────────────────── -->
+        <plugin filename="libignition-gazebo-imu-system"
+                name="ignition::gazebo::systems::Imu">
+        </plugin>
+
+        <!-- ─────────────────────────────────────────────
+            [LIGHT] SUN
+        ────────────────────────────────────────────── -->
+        <light name="sun" type="directional">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <!-- ─────────────────────────────────────────────
+            [MODEL] GROUND PLANE
+        ────────────────────────────────────────────── -->
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                </collision>
+
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.8 0.8 1</ambient>
+                        <diffuse>0.8 0.8 0.8 1</diffuse>
+                        <specular>0.8 0.8 0.8 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+
+        <!-- ─────────────────────────────────────────────
+            [MODEL] WALLS
+        ────────────────────────────────────────────── -->
+        <model name="wall">
+            <static>true</static>
+            <pose>0 0 0 0 0 0</pose>
+
+            <link name="wall_1">
+                <pose>0 -10 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>20 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>20 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_2_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_2</child>
+            </joint>
+
+            <link name="wall_2">
+                <pose>0 10 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>20 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>20 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_3_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_3</child>
+            </joint>
+
+            <link name="wall_3">
+                <pose>-10 0 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>0.2 20 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>0.2 20 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_4_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_4</child>
+            </joint>
+
+            <link name="wall_4">
+                <pose>10 0 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>0.2 20 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>0.2 20 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_5_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_5</child>
+            </joint>
+
+            <link name="wall_5">
+                <pose>0 3 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>5 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>5 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_6_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_6</child>
+            </joint>
+
+            <link name="wall_6">
+                <pose>0 -6 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>5 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>5 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_7_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_7</child>
+            </joint>
+
+            <link name="wall_7">
+                <pose>6 -8 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_8_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_8</child>
+            </joint>
+
+            <link name="wall_8">
+                <pose>-4 8 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_9_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_9</child>
+            </joint>
+
+            <link name="wall_9">
+                <pose>-8 3 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_10_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_10</child>
+            </joint>
+
+            <link name="wall_10">
+                <pose>8 -2 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_11_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_11</child>
+            </joint>
+
+            <link name="wall_11">
+                <pose>-5 -5 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>0.2 4 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="wall_12_joint" type="fixed">
+                <parent>wall_1</parent>
+                <child>wall_12</child>
+            </joint>
+
+            <link name="wall_12">
+                <pose>5 6 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>4 0.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>1 0.9 0.1 1</ambient>
+                        <diffuse>1 0.9 0.2 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+        </model>
+
+        <!-- ─────────────────────────────────────────────
+            [MODEL] OBSTACLE
+        ────────────────────────────────────────────── -->
+        <model name="obstacle">
+            <static>true</static>
+            <pose>0 0 0 0 0 0</pose>
+
+            <link name="obstacle_1">
+                <pose>0 6.5 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <box>
+                            <size>1.5 1.5 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <box>
+                            <size>1.5 1.5 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.7 0 1</ambient>
+                        <diffuse>0.6 0.4 0.8 1</diffuse>
+                        <specular>0.2 0.2 0.2 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="obstacle_2_joint" type="fixed">
+                <parent>obstacle_1</parent>
+                <child>obstacle_2</child>
+            </joint>
+
+            <link name="obstacle_2">
+                <pose>-8 -3 0.5 0 0 0</pose>
+                <collision name="c">
+                    <geometry>
+                        <cylinder>
+                            <length>1.0</length>
+                            <radius>0.5</radius>
+                        </cylinder>
+                    </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <cylinder>
+                            <length>1.0</length>
+                            <radius>0.5</radius>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.7 0 1</ambient>
+                        <diffuse>0.7 0.9 1 1</diffuse>
+                        <specular>0.2 0.2 0.2 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+            <joint name="obstacle_3_joint" type="fixed">
+                <parent>obstacle_1</parent>
+                <child>obstacle_3</child>
+            </joint>
+
+            <link name="obstacle_3">
+                <pose>6.5 1.5 0.8 0 0 0</pose>
+                <collision name="c">
+                <geometry>
+                    <sphere>
+                        <radius>0.8</radius>
+                    </sphere>
+                </geometry>
+                </collision>
+                <visual name="v">
+                    <geometry>
+                        <sphere>
+                            <radius>0.8</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>0.9 0.5 0.5 1</ambient>
+                        <diffuse>1 0.6 0.6 1</diffuse>
+                        <specular>0.1 0.1 0.1 1</specular>
+                    </material>
+                </visual>
+            </link>
+
+        </model>
+
+    </world>
+
+</sdf>

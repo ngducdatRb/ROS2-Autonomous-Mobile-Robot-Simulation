@@ -32,6 +32,7 @@ ign_world = 'demo'
 
 ROBOTS = [
     {'ns': 'r1', 'x': '0.0', 'y': '0.0', 'z': '0.01', 'Y': '0.0'},
+    {'ns': 'r2', 'x': '2.0', 'y': '0.0', 'z': '0.01', 'Y': '0.7'},
 ]
 
 
@@ -216,7 +217,7 @@ def generate_launch_description():
     # ─────────────────────────────────────────────────────────────────────────
     open_ign = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(file_gz_sim),
-        launch_arguments={'gz_args': f' -r -s {file_cfg_world}'}.items()
+        launch_arguments={'gz_args': f' -r {file_cfg_world}'}.items()
     )
 
     # ─────────────────────────────────────────────────────────────────────────
