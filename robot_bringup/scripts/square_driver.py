@@ -1,118 +1,210 @@
 import rclpy
 import numpy as np
+
+from dataclasses import dataclass
+
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, PoseStamped
 from scipy.spatial.transform import Rotation
+from geometry_msgs.msg import Twist, PoseStamped
+from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 
-from rclpy.qos import QoSProfile, ReliabilityPolicy
-from rclpy.qos import DurabilityPolicy, HistoryPolicy
 
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+def quat_to_yaw(q) -> float:
+    return Rotation.from_quat([q.x, q.y, q.z, q.w]).as_euler('xyz')[2]
+
+
+def normalize_angle(angle: float) -> float:
+    return (angle + np.pi) % (2 * np.pi) - np.pi
+
+
+# =============================================================================
+# DATA CLASSES
+# =============================================================================
+
+@dataclass
+class Pose2D:
+    x:   float = 0.0
+    y:   float = 0.0
+    yaw: float = 0.0
+
+    def snapshot(self, other: 'Pose2D') -> None:
+        self.x   = other.x
+        self.y   = other.y
+        self.yaw = other.yaw
+
+    def distance_to(self, ref: 'Pose2D') -> float:
+        return np.hypot(self.x - ref.x, self.y - ref.y)
+
+    def yaw_delta_from(self, ref: 'Pose2D') -> float:
+        return abs(normalize_angle(self.yaw - ref.yaw))
+
+
+@dataclass(frozen=True)
+class DriverConfig:
+    linear_speed:  float = 0.3
+    angular_speed: float = 0.4
+    side_length:   float = 2.0
+    turn_angle:    float = np.pi / 2
+    num_sides:     int   = 4
+    control_hz:    float = 10.0
+
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+BEST_EFFORT_QOS = QoSProfile(
+    reliability=ReliabilityPolicy.BEST_EFFORT,
+    durability=DurabilityPolicy.VOLATILE,
+    history=HistoryPolicy.KEEP_LAST,
+    depth=10,
+)
+
+
+# =============================================================================
+# NODE
+# =============================================================================
 
 class SquareDriver(Node):
-    def __init__(self):
+
+    def __init__(self, cfg: DriverConfig = DriverConfig()):
         super().__init__('square_driver')
-        self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        
-        qos = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT,
-            durability=DurabilityPolicy.VOLATILE,
-            history=HistoryPolicy.KEEP_LAST,
-            depth=10
-        )
+
+        self.cfg = cfg
+
+        self.pose:     Pose2D | None = None
+        self.ref_pose: Pose2D = Pose2D()
+
+        self.state:      str = 'INIT'
+        self.side_index: int = 0
+
+        self.cmd_pub = self.create_publisher(Twist, '/r1/cmd_vel', 10)
 
         self.create_subscription(
             PoseStamped,
-            '/model/robot/pose',
-            self.callback,
-            qos
+            '/r1/odom/ground_truth',
+            self._pose_callback,
+            BEST_EFFORT_QOS,
         )
 
-        self.linear_speed  = 0.3        # m/s
-        self.angular_speed = 0.4        # rad/s
-        self.side_length   = 2.0        # m
-        self.turn_angle    = np.pi / 2  # 90 độ
+        self.timer = self.create_timer(
+            1.0 / self.cfg.control_hz,
+            self._control_loop,
+        )
 
-        self.x   = None
-        self.y   = None
-        self.yaw = None
+    # ─────────────────────────────────────────────────────────────────────────
+    # Subscriber callback
+    # ─────────────────────────────────────────────────────────────────────────
 
-        self.start_x   = None
-        self.start_y   = None
-        self.start_yaw = None
+    def _pose_callback(self, msg: PoseStamped) -> None:
+        self.pose = Pose2D(
+            x   = msg.pose.position.x,
+            y   = msg.pose.position.y,
+            yaw = quat_to_yaw(msg.pose.orientation),
+        )
 
-        self.phase      = 'init'   # init | straight | turn | done
-        self.side_count = 0
+    # ─────────────────────────────────────────────────────────────────────────
+    # Pose helpers
+    # ─────────────────────────────────────────────────────────────────────────
 
-        self.timer = self.create_timer(0.1, self.run)  # 10Hz
+    def _snapshot_ref(self) -> None:
+        self.ref_pose.snapshot(self.pose)
 
-    def get_yaw(self, robot_quat):
-        q = robot_quat
-        return Rotation.from_quat([q.x, q.y, q.z, q.w]).as_euler('xyz')[2]
+    def _traveled_distance(self) -> float:
+        return self.pose.distance_to(self.ref_pose)
 
-    def callback(self, msg: PoseStamped):
-        self.x   = msg.pose.position.x
-        self.y   = msg.pose.position.y
-        self.yaw = self.get_yaw(msg.pose.orientation)
+    def _rotated_angle(self) -> float:
+        return self.pose.yaw_delta_from(self.ref_pose)
 
-    def run(self):
-        if self.x is None:
+    # ─────────────────────────────────────────────────────────────────────────
+    # Publisher helpers
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _publish(self, linear: float = 0.0, angular: float = 0.0) -> None:
+        cmd = Twist()
+        cmd.linear.x  = linear
+        cmd.angular.z = angular
+        self.cmd_pub.publish(cmd)
+
+    def _publish_stop(self) -> None:
+        self._publish()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # FSM handlers
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def _handle_init(self) -> None:
+        self._snapshot_ref()
+        self.state = 'MOVE'
+        self.get_logger().info(f'[START] Edge {self.side_index + 1}/{self.cfg.num_sides}')
+
+    def _handle_move(self) -> None:
+        if self._traveled_distance() < self.cfg.side_length:
+            self._publish(linear=self.cfg.linear_speed)
+        else:
+            self.get_logger().info(f'[MOVE DONE] {self._traveled_distance():.2f} m')
+            self._snapshot_ref()
+            self.state = 'TURN'
+
+    def _handle_turn(self) -> None:
+        if self._rotated_angle() < self.cfg.turn_angle:
+            self._publish(angular=self.cfg.angular_speed)
+        else:
+            self.side_index += 1
+            self.get_logger().info(f'[TURN DONE] Side {self.side_index}/{self.cfg.num_sides}')
+
+            if self.side_index >= self.cfg.num_sides:
+                self.state = 'DONE'
+            else:
+                self._snapshot_ref()
+                self.state = 'MOVE'
+
+    def _handle_done(self) -> None:
+        self._publish_stop()
+        self.get_logger().info('Square completed!')
+        self.timer.cancel()
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Control loop
+    # ─────────────────────────────────────────────────────────────────────────
+
+    _FSM_HANDLERS = {
+        'INIT': '_handle_init',
+        'MOVE': '_handle_move',
+        'TURN': '_handle_turn',
+        'DONE': '_handle_done',
+    }
+
+    def _control_loop(self) -> None:
+        if self.pose is None:
             return
 
-        msg = Twist()
+        handler_name = self._FSM_HANDLERS.get(self.state)
+        if handler_name:
+            getattr(self, handler_name)()
 
-        if self.phase == 'init':
-            self.start_x   = self.x
-            self.start_y   = self.y
-            self.start_yaw = self.yaw
-            self.phase     = 'straight'
-            self.get_logger().info('[Start]: Edge: 1/4')
 
-        elif self.phase == 'straight':
-            dist = np.sqrt((self.x - self.start_x)**2 + (self.y - self.start_y)**2)
-            if dist < self.side_length:
-                msg.linear.x = self.linear_speed
-            else:
-                self.start_yaw = self.yaw
-                self.phase     = 'turn'
-                self.get_logger().info(f'Move Straight done {dist:.3f}m → Rotate 90°')
-
-        elif self.phase == 'turn':
-            turned = self.yaw - self.start_yaw
-            turned = (turned + np.pi) % (2 * np.pi) - np.pi
-
-            if abs(turned) < self.turn_angle:
-                msg.angular.z = self.angular_speed
-            else:
-                self.side_count += 1
-                self.get_logger().info(f'Rotate done {np.degrees(turned):.1f}° → Edge {self.side_count + 1}/4')
-
-                if self.side_count >= 4:
-                    self.phase = 'done'
-                else:
-                    self.start_x   = self.x
-                    self.start_y   = self.y
-                    self.start_yaw = self.yaw
-                    self.phase     = 'straight'
-
-        elif self.phase == 'done':
-            self.pub.publish(Twist())
-            self.get_logger().info('Complete Square!')
-            self.timer.cancel()
-            return
-
-        self.pub.publish(msg)
-
+# =============================================================================
+# MAIN
+# =============================================================================
 
 def main(args=None):
     rclpy.init(args=args)
     node = SquareDriver()
+
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
     finally:
+        node._publish_stop()
         node.destroy_node()
-        rclpy.try_shutdown()
+        rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

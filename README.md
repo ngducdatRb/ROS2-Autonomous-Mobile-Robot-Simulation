@@ -17,7 +17,7 @@ Focus on **odometry drift analysis**, **quantitative evaluation of localization 
 
 ![OdomDrift](robot_metrics/images/odom_drift.gif)
 
-<img src="robot_metrics/images/plot_error_2.png" width="800"/>
+<img src="robot_metrics/images/plot_error_4.png" width="800"/>
 
 <img src="robot_metrics/images/ekf_robot_localization.png" width="800"/>
 
@@ -67,7 +67,12 @@ This repository includes a dedicated evaluation pipeline that:
 
 This allows users to **quantitatively assess odometry performance** in simulation.
 
-**Result**: After simulation, EKF produced filtered odometry that was **77.5%** improved compared to wheel odometry.
+**Result**: 
+- After simulation, EKF produced filtered odometry that was **83.3%** improved compared to wheel odometry.
+
+**Note**: 
+- Wheel radius and wheel separation are key parameters of the differential drive odometry. 
+- Inaccurate calibration of these values will directly affect the quality of the diff drive odometry, which in turn degrades the EKF fusion result.
 
 ---
 
@@ -141,23 +146,13 @@ python3 teleop_keyboard.py
 
 ```bash
 # Check odometry
-ros2 topic echo /odom
+ros2 topic echo /r1/odom
 
 # Check LiDAR
-ros2 topic echo /lidar/data
+ros2 topic echo /r1/scan
 
 # Check IMU
-ros2 topic echo /imu/data
-```
-
-###  Play rosbag
-
-```bash
-# Move to rosbag folder
-cd ~/robot_ws/src/robot_bag/odom_drift_1/
-
-# Play rosbag
-ros2 bag play odom_drift_2.db3 
+ros2 topic echo /r1/imu
 ```
 
 ### Run Evaluation Script
@@ -184,10 +179,10 @@ python3 plot_error.py
 
 ### 📡 Sensors
 
-|  Sensor       |   Type           |   Topic         | Rate   |
-|:--------------|:-----------------|:----------------|-------:|
-|  IMU          |   9-DOF IMU      |   `/imu/data`   | 50 Hz  |
-|  LiDAR        |   Hokuyo UST-10  |   `/lidar/data` | 10 Hz  |
-|  Depth Camera | Intel RealSense D435 | `/camera/*` | 5 Hz   |
+|  Sensor       |   Type           |   Topic           | Rate   |
+|:--------------|:-----------------|:------------------|-------:|
+|  IMU          |   9-DOF IMU      |   `/r1/imu`       | 50 Hz  |
+|  LiDAR        |   Hokuyo UST-10  |   `/r1/scan`      | 10 Hz  |
+|  Depth Camera | Intel RealSense D435 | `/r1/camera/*`| 5 Hz   |
 
 ---

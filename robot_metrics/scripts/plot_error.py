@@ -19,25 +19,23 @@ from rosidl_runtime_py.utilities import get_message
 # ──────────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ──────────────────────────────────────────────────────────────────
-TOPIC_GROUND_TRUTH    = "/model/robot/pose"
-TOPIC_ODOM_DIFF_DRIVE = "/diff_drive/odom"
-TOPIC_ODOM_PUBLISHER  = "/odom_publisher/odom"
-TOPIC_ODOM_FILTERED   = "/odometry/filtered"
+TOPIC_GROUND_TRUTH    = "/r1/odom/ground_truth"
+TOPIC_ODOM_DIFF_DRIVE = "/r1/odom/diff_drive"
+TOPIC_ODOM_PUBLISHER  = "/r1/odom/odom_publisher"
+TOPIC_ODOM_FILTERED   = "/r1/odom/filtered"
 
 all_topics = {
-    TOPIC_GROUND_TRUTH, 
-    TOPIC_ODOM_DIFF_DRIVE, 
-    TOPIC_ODOM_PUBLISHER, 
+    TOPIC_GROUND_TRUTH,
+    TOPIC_ODOM_DIFF_DRIVE,
+    TOPIC_ODOM_PUBLISHER,
     TOPIC_ODOM_FILTERED
 }
-
-ROBOT_FRAME = "robot"
 
 # ──────────────────────────────────────────────────────────────────
 # PATH
 # ──────────────────────────────────────────────────────────────────
-PATH_BAG  = "/home/d4z/ros2/robot_sim_ws/src/robot_bag/odom_drift_2"
-PATH_IMG  = "/home/d4z/ros2/robot_sim_ws/src/robot_metrics/images/plot_error_2.png"
+PATH_BAG  = "/home/d4z/ros2/robot_sim_ws/src/robot_bag/odom_drift_1"
+PATH_IMG  = "/home/d4z/ros2/robot_sim_ws/src/robot_metrics/images/plot_error_1.png"
 
 PATH_FONT_SPACEMONO  = "/home/d4z/.local/share/fonts/SpaceMono-Regular.ttf"
 PATH_FONT_ROBOTOSLAB = "/home/d4z/.local/share/fonts/RobotoSlab-VariableFont_wght.ttf"
@@ -62,10 +60,10 @@ class Trajectory:
     @classmethod
     def empty(cls) -> "Trajectory":
         return cls(time=[], x=[], y=[], yaw=[])
-    
+
     def to_numpy(self) -> "Trajectory":
         new_data = {f.name: np.array(getattr(self, f.name))
-            for f in fields(self)            
+            for f in fields(self)
         }
         return Trajectory(**new_data)
 
@@ -81,7 +79,7 @@ class Trajectory:
         self.x.append(pose.x)
         self.y.append(pose.y)
         self.yaw.append(pose.yaw)
-        
+
 @dataclass
 class RosbagData:
     ground_truth   : Trajectory
@@ -129,7 +127,7 @@ def _parse_odom_msg(msg: Odometry) -> ParsedPose:
     yaw  = quaternion_to_yaw(msg.pose.pose.orientation)
     return ParsedPose(time, x, y, yaw)
 
-def _parse_pose_msg(msg: PoseStamped) -> ParsedPose:        
+def _parse_pose_msg(msg: PoseStamped) -> ParsedPose:
         time = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
         x    = msg.pose.position.x
         y    = msg.pose.position.y
@@ -173,7 +171,7 @@ def _collect_trajectories(bag_reader: BagReader) -> RosbagData:
                 odom_publisher.append(pose)
             elif topic_name == TOPIC_ODOM_FILTERED:
                 odom_filtered.append(pose)
-    
+
     ground_truth, odom_diff_drive, odom_publisher, odom_filtered = [
         traj.to_numpy().sort_by_time()
         for traj in (ground_truth, odom_diff_drive, odom_publisher, odom_filtered)
@@ -199,9 +197,9 @@ def read_rosbag(path_bag: str) -> RosbagData:
     valid_rosbag = _validate_trajectories(trajectories)
 
     return RosbagData(
-        trajectories.ground_truth, 
-        trajectories.odom_diff_drive, 
-        trajectories.odom_publisher, 
+        trajectories.ground_truth,
+        trajectories.odom_diff_drive,
+        trajectories.odom_publisher,
         trajectories.odom_filtered
     )
 
@@ -217,10 +215,10 @@ def align_trajectories(gt: Trajectory, src: Trajectory) -> tuple[Trajectory, Tra
 
     if len(common_time) == 0:
         raise RuntimeError("No common time between GT and Src")
-    
+
     unwrap_yaw_gt  = np.unwrap(gt.yaw)
     unwrap_yaw_src = np.unwrap(src.yaw)
-        
+
     interp_yaw_gt  = np.interp(common_time, rel_gt, unwrap_yaw_gt)
     interp_yaw_src = np.interp(common_time, rel_src, unwrap_yaw_src)
 
@@ -324,7 +322,7 @@ def _plot_metric_table(ax: Axes, err: ErrorBundle) -> None:
             f"{err.odom_publisher.metrics[key]:{fmt}} {unit}",
             f"{err.odom_filtered.metrics[key]:{fmt}} {unit}",
         ])
-    
+
     imp_ekf = (err.odom_diff_drive.metrics['rmse_position'] - err.odom_filtered.metrics['rmse_position']) / err.odom_diff_drive.metrics['rmse_position'] * 100
     rows.append(["RMSE improvement", "—", "—", f"{imp_ekf:.1f} %"])
 
@@ -346,14 +344,20 @@ def plot_results(trajs: RosbagData, err: ErrorBundle) -> None:
 
     fig, axes = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle("Error Analysis", fontsize=14, fontweight="bold", fontproperties=font_prop)
-    
+
     _plot_trajectories(axes[0, 0], trajs)
     _plot_error_distance(axes[0, 1], trajs, err)
     _plot_error_yaw(axes[1, 0], trajs, err)
     _plot_metric_table(axes[1, 1], err)
+    
+    fig.text(
+        x=0.02, y=0.9, s="bag_file: odom_drift_1\nwheel radius: 0.0792 (m)\nwheel separation: 0.288 (m)", 
+        fontsize=12, ha='left', va='top', color='black', style='italic',
+        bbox=dict(boxstyle='round,pad=0.5', facecolor='white', alpha=0.6, edgecolor='black')
+    )
 
     plt.tight_layout()
-    plt.savefig(PATH_IMG, dpi=150)
+    plt.savefig(PATH_IMG, dpi=150, bbox_inches='tight')
     plt.show()
     print(f"Saved → {PATH_IMG}")
 
