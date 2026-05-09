@@ -51,10 +51,10 @@ This repository includes a dedicated evaluation pipeline that:
 1. Use the `robot_localization` package to fuse wheel odometry and IMU data
 
 2. Records both:
-   - Ground truth trajectory (`/model/robot/pose`)
-   - Wheel odometry (`/diff_drive/odom`)
-   - Odometry Publisher plugin (`/odom_publisher/odom`)
-   - Odometry Filtered EKF - robot_localization pkg (`/odometry/filtered`)
+   - Ground truth trajectory (`/r1/odom/ground_truth`)
+   - Wheel odometry (`/r1/odom/diff_drive`)
+   - Odometry Publisher plugin (`/r1/odom/odom_publisher`)
+   - Odometry Filtered EKF - robot_localization pkg (`/r1/odom/filtered`)
 
 3. Aligns trajectories in time and interpolates data
 
